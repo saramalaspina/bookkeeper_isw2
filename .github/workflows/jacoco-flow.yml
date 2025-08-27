@@ -1,0 +1,43 @@
+# GitHub Actions workflow for Code Coverage Analysis.
+#
+# This workflow triggers on push/pull_request and can also be run manually.
+# It builds a specific subset of project modules for speed and stability,
+# activates the 'jacoco' Maven profile to generate a code coverage report,
+# and uploads the resulting HTML report as a build artifact.
+
+name: JaCoCo Code Coverage
+
+on:
+  push:
+    branches: [ "master" ]
+
+  pull_request:
+    branches: [ "master"]
+
+  workflow_dispatch:
+
+jobs:
+  build-and-coverage:
+    name: Build with JaCoCo Coverage
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build with JaCoCo and Generate Report
+        run: mvn clean verify -P jacoco
+
+      - name: Upload JaCoCo Code Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: bookkeeper-server/target/site/jacoco/
+          if-no-files-found: error

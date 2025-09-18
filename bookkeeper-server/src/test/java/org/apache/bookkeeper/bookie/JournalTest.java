@@ -1,6 +1,8 @@
 package org.apache.bookkeeper.bookie;
 
+
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -8,6 +10,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -92,6 +95,34 @@ class JournalTest {
             List<Long> actualIds = Journal.listJournalIds(journalDir, filter);
             assertEquals(expectedIds, actualIds);
         }
+    }
+
+    // Test added after first PIT report (mutant "Collections.sort(logs)" survived)
+    @Test
+    void testListJournalIds_TwoLogs(@TempDir File tempDir) throws IOException {
+        File dirWithTwoLogs = new File(tempDir, "with_two_logs");
+        dirWithTwoLogs.mkdir();
+
+        File logHexF = new File(dirWithTwoLogs, "f.txn"); // ID = 15
+        File logHexA = new File(dirWithTwoLogs, "a.txn"); // ID = 10
+
+        logHexF.createNewFile();
+        logHexA.createNewFile();
+
+        // Use a Mockito spy to intercept the call to `listFiles()`.
+        // This allows us to control the order in which the files are "discovered" ensuring the test is deterministic and doesn't depend on the filesystem's behavior.
+        File spyDir = Mockito.spy(dirWithTwoLogs);
+
+        // We instruct the spy to return the files in a non-numerical order (15, then 10)
+        Mockito.doReturn(new File[]{logHexF, logHexA}).when(spyDir).listFiles();
+
+        // null filter to accept all journals
+        List<Long> actualIds = Journal.listJournalIds(spyDir, null);
+
+        // We expect the returned list to be numerically sorted ([10, 15]), regardless of the order they were read in.
+        // This assertion will fail if the `Collections.sort(logs)` line is mutated (removed)
+        List<Long> expectedSortedIds = Arrays.asList(10L, 15L);
+        assertEquals(expectedSortedIds, actualIds, "The journal IDs must be returned in sorted order.");
     }
 
 }

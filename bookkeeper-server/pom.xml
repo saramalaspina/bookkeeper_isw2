@@ -386,6 +386,9 @@
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>
             <configuration>
+              <includes>
+                <include>**/LLMJournalTest.java</include>
+              </includes>
               <argLine>@{argLine}</argLine>
             </configuration>
           </plugin>
@@ -447,7 +450,7 @@
                 <param>org.apache.bookkeeper.bookie.Journal</param>
               </targetClasses>
               <targetTests>
-                <param>org.apache.bookkeeper.bookie.JournalTest</param>
+                <param>org.apache.bookkeeper.bookie.LLMJournalTest</param>
               </targetTests>
               <outputFormats>
                 <outputFormat>XML</outputFormat>

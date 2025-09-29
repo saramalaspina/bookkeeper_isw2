@@ -76,7 +76,10 @@ class BufferedChannelConstructorTest {
                 Arguments.of("Success: wc=1024, uBB=512", ByteBufAllocator.DEFAULT, validFileChannel, 1024, 512L, null, true, 0L),
 
                 // Test added after first PIT report (mutant "this.writeBufferStartPosition.set(position)" survived)
-                Arguments.of("Success: Non Zero Position", ByteBufAllocator.DEFAULT, validFileChannelPosNoZero, 1024, 512L, null, true, 1024L)
+                Arguments.of("Success: Non Zero Position", ByteBufAllocator.DEFAULT, validFileChannelPosNoZero, 1024, 512L, null, true, 1024L),
+
+                // Test added to create a trusted configuration for write() method tests, that isolates the buffer capacity flush mechanism by disabling the unpersistedBytesBound safety policy
+                Arguments.of("Success: wc=1024, uBB=0", ByteBufAllocator.DEFAULT, validFileChannel, 1024, 0L, null, false, 0L)
         );
     }
 

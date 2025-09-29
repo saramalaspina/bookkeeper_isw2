@@ -28,6 +28,9 @@ class BufferedChannelConstructorTest {
     private static FileChannel closedFileChannel;
     private static ByteBufAllocator failingAllocator;
 
+    // Mock added after first PIT report (mutant "this.writeBufferStartPosition.set(position)" survived)
+    private static FileChannel validFileChannelPosNoZero;
+
     @BeforeAll
     static void setupMocks() throws IOException {
         // Mock a VALID and working FileChannel
@@ -44,35 +47,43 @@ class BufferedChannelConstructorTest {
         failingAllocator = mock(ByteBufAllocator.class);
         // When trying to allocate a buffer, it throws a critical error
         when(failingAllocator.directBuffer(anyInt())).thenThrow(new OutOfMemoryError("Memory exhausted"));
+
+        // Mock a VALID and working FileChannel with position > zero
+        validFileChannelPosNoZero = mock(FileChannel.class);
+        // When the constructor asks for the position, return 1024
+        when(validFileChannelPosNoZero.position()).thenReturn(1024L);
     }
 
 
     private static Stream<Arguments> provideConstructorArguments() {
         return Stream.of(
                 // Robustness tests (one-at-a-time approach)
-                Arguments.of("Error: Null Allocator", null, validFileChannel, 1, 0L, NullPointerException.class, false),
-                Arguments.of("Error: Failing Allocator", failingAllocator, validFileChannel, 1, 0L, OutOfMemoryError.class, false),
-                Arguments.of("Error: Null FileChannel", ByteBufAllocator.DEFAULT, null, 1, 0L, NullPointerException.class, false),
-                Arguments.of("Error: Closed FileChannel", ByteBufAllocator.DEFAULT, closedFileChannel, 1, 0L, IOException.class, false),
-                Arguments.of("Error: Negative writeCapacity", ByteBufAllocator.DEFAULT, validFileChannel, -1, 0L, IllegalArgumentException.class, false),
+                Arguments.of("Error: Null Allocator", null, validFileChannel, 1, 0L, NullPointerException.class, false, 0L),
+                Arguments.of("Error: Failing Allocator", failingAllocator, validFileChannel, 1, 0L, OutOfMemoryError.class, false, 0L),
+                Arguments.of("Error: Null FileChannel", ByteBufAllocator.DEFAULT, null, 1, 0L, NullPointerException.class, false, 0L),
+                Arguments.of("Error: Closed FileChannel", ByteBufAllocator.DEFAULT, closedFileChannel, 1, 0L, IOException.class, false, 0L),
+                Arguments.of("Error: Negative writeCapacity", ByteBufAllocator.DEFAULT, validFileChannel, -1, 0L, IllegalArgumentException.class, false, 0L),
 
                 // Correctness tests (multi-dimensional cases)
-                Arguments.of("Success: wc=0, uBB=0", ByteBufAllocator.DEFAULT, validFileChannel, 0, 0L, null, false),
-                Arguments.of("Success: wc=1, uBB=0", ByteBufAllocator.DEFAULT, validFileChannel, 1, 0L, null, false),
-                Arguments.of("Success: wc=1, uBB=1", ByteBufAllocator.DEFAULT, validFileChannel, 1, 1L, null, true),
-                Arguments.of("Success: wc=1, uBB=2", ByteBufAllocator.DEFAULT, validFileChannel, 1, 2L, null, true),
-                Arguments.of("Success: wc=1, uBB=-1", ByteBufAllocator.DEFAULT, validFileChannel, 1, -1L, null, false),
-                Arguments.of("Success: wc=1024, uBB=1023", ByteBufAllocator.DEFAULT, validFileChannel, 1024, 1023L, null, true),
-                Arguments.of("Success: wc=1024, uBB=1024", ByteBufAllocator.DEFAULT, validFileChannel, 1024, 1024L, null, true),
-                Arguments.of("Success: wc=1024, uBB=1025", ByteBufAllocator.DEFAULT, validFileChannel, 1024, 1025L, null, true),
-                Arguments.of("Success: wc=1024, uBB=512", ByteBufAllocator.DEFAULT, validFileChannel, 1024, 512L, null, true)
+                Arguments.of("Success: wc=0, uBB=0", ByteBufAllocator.DEFAULT, validFileChannel, 0, 0L, null, false, 0L),
+                Arguments.of("Success: wc=1, uBB=0", ByteBufAllocator.DEFAULT, validFileChannel, 1, 0L, null, false, 0L),
+                Arguments.of("Success: wc=1, uBB=1", ByteBufAllocator.DEFAULT, validFileChannel, 1, 1L, null, true, 0L),
+                Arguments.of("Success: wc=1, uBB=2", ByteBufAllocator.DEFAULT, validFileChannel, 1, 2L, null, true, 0L),
+                Arguments.of("Success: wc=1, uBB=-1", ByteBufAllocator.DEFAULT, validFileChannel, 1, -1L, null, false, 0L),
+                Arguments.of("Success: wc=1024, uBB=1023", ByteBufAllocator.DEFAULT, validFileChannel, 1024, 1023L, null, true, 0L),
+                Arguments.of("Success: wc=1024, uBB=1024", ByteBufAllocator.DEFAULT, validFileChannel, 1024, 1024L, null, true, 0L),
+                Arguments.of("Success: wc=1024, uBB=1025", ByteBufAllocator.DEFAULT, validFileChannel, 1024, 1025L, null, true, 0L),
+                Arguments.of("Success: wc=1024, uBB=512", ByteBufAllocator.DEFAULT, validFileChannel, 1024, 512L, null, true, 0L),
+
+                // Test added after first PIT report (mutant "this.writeBufferStartPosition.set(position)" survived)
+                Arguments.of("Success: Non Zero Position", ByteBufAllocator.DEFAULT, validFileChannelPosNoZero, 1024, 512L, null, true, 1024L)
         );
     }
 
     @ParameterizedTest(name = "{index}: {0}")
     @MethodSource("provideConstructorArguments")
     void testConstructor(String testName, ByteBufAllocator allocator, FileChannel fc, int writeCapacity, long uBB,
-                         Class<? extends Throwable> expectedException, boolean expectedDoRegularFlushes) {
+                         Class<? extends Throwable> expectedException, boolean expectedDoRegularFlushes, long expectedPosition) {
 
         final int READ_CAPACITY_FIXED = 1024; // Fixed value, as per the testing strategy
 
@@ -92,7 +103,7 @@ class BufferedChannelConstructorTest {
                 assertAll("Full state verification for: " + testName,
                         () -> assertEquals(writeCapacity, finalChannel.writeBuffer.capacity(), "writeCapacity should match"),
                         () -> assertEquals(finalChannel.position(), finalChannel.getFileChannelPosition(), "writeBufferStartPosition should be initialized to the file's position."),
-                        () -> assertEquals(0, finalChannel.position(), "position should be 0"),
+                        () -> assertEquals(expectedPosition, finalChannel.position(), "position should be initialized correctly"),
                         () -> assertEquals(uBB, finalChannel.unpersistedBytesBound, "unpersistedBytesBound should match"),
                         () -> assertEquals(expectedDoRegularFlushes, getDoRegularFlushes(finalChannel), "doRegularFlushes logic should be correct"),
                         () -> assertEquals(0, finalChannel.getUnpersistedBytes(), "unpersistedBytes should start at 0"),

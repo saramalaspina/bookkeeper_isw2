@@ -387,7 +387,9 @@
             <artifactId>maven-surefire-plugin</artifactId>
             <configuration>
               <includes>
-                <include>**/LLMJournalTest.java</include>
+                <include>**/BufferedChannelConstructorTest.java</include>
+                <!-- <include>**/JournalTest.java</include> -->
+                <!-- <include>**/LLMJournalTest.java</include> -->
               </includes>
               <argLine>@{argLine}</argLine>
             </configuration>
@@ -447,10 +449,13 @@
                 <jvmArg>java.base/java.util=ALL-UNNAMED</jvmArg>
               </jvmArgs>
               <targetClasses>
-                <param>org.apache.bookkeeper.bookie.Journal</param>
+                <!-- <param>org.apache.bookkeeper.bookie.Journal</param> -->
+                <param>org.apache.bookkeeper.bookie.BufferedChannel</param>
               </targetClasses>
               <targetTests>
-                <param>org.apache.bookkeeper.bookie.LLMJournalTest</param>
+                <!-- <param>org.apache.bookkeeper.bookie.JournalTest</param> -->
+                <!-- <param>org.apache.bookkeeper.bookie.LLMJournalTest</param> -->
+                <param>org.apache.bookkeeper.bookie.BufferedChannelConstructorTest</param>
               </targetTests>
               <outputFormats>
                 <outputFormat>XML</outputFormat>

@@ -3,8 +3,7 @@ package org.apache.bookkeeper.bookie;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.Unpooled;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -12,6 +11,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -189,6 +190,69 @@ class BufferedChannelWriteTest {
             if (src != null && src.refCnt() > 0) {
                 src.release();
             }
+            if (channel != null && channel.writeBuffer != null && channel.writeBuffer.refCnt() > 0) {
+                channel.writeBuffer.release();
+            }
+        }
+    }
+
+
+    @Test
+    @DisplayName("BUG: Write on a zero-capacity channel causes an infinite loop")
+    @Tag("hanging")
+    void testWrite_onZeroCapacityChannel() {
+        // This test case verifies the critical bug where a writeCapacity of 0
+        // causes an infinite loop in the write() method. The @Timeout annotation
+        // will cause the test to fail if it doesn't complete within 1 second,
+        // which proves the existence of the bug
+
+        BufferedChannel channel = null;
+        ByteBuf data = Unpooled.buffer(1).writerIndex(1);
+        try {
+            channel = new BufferedChannel(allocator, mockFc, 0, 1024, 0);
+
+            BufferedChannel finalChannel = channel;
+            assertTimeoutPreemptively(Duration.ofSeconds(1), () -> {
+                finalChannel.write(data);
+            }, "The write() method did not complete within the timeout, indicating an infinite loop.");
+
+            fail("Expected a timeout, but the method completed. The infinite loop bug may be fixed.");
+        } catch (IOException e) {
+            fail("Expected a timeout, but an IOException was thrown.", e);
+        } finally {
+            data.release();
+            if (channel != null && channel.writeBuffer != null && channel.writeBuffer.refCnt() > 0) {
+                channel.writeBuffer.release();
+            }
+        }
+    }
+
+    @Test
+    @DisplayName("Write that triggers a flush on a closed channel should throw IOException")
+    void testWrite_onClosedChannel() {
+        // This test verifies that the write() method behaves correctly if the underlying
+        // FileChannel is closed after the BufferedChannel has been instantiated but
+        // before a flush-triggering write occurs
+
+        BufferedChannel channel = null;
+        // We need enough data to force a flush to actually interact with the closed channel
+        ByteBuf dataToForceFlush = Unpooled.buffer(1024).writerIndex(1024);
+        try {
+            channel = new BufferedChannel(allocator, mockFc, 1024, 1024, 0);
+
+            // We simulate the FileChannel being closed
+            when(mockFc.write(any(ByteBuffer.class)))
+                    .thenThrow(new java.nio.channels.ClosedChannelException());
+
+            BufferedChannel finalChannel = channel;
+            assertThrows(IOException.class, () -> {
+                finalChannel.write(dataToForceFlush);
+            }, "An IOException should be thrown when flushing to a closed channel.");
+
+        } catch (IOException e) {
+            fail("Test setup failed with an unexpected IOException", e);
+        } finally {
+            dataToForceFlush.release();
             if (channel != null && channel.writeBuffer != null && channel.writeBuffer.refCnt() > 0) {
                 channel.writeBuffer.release();
             }

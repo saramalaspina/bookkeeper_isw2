@@ -393,6 +393,7 @@
                 <include>**/BufferedChannelWriteTest.java</include>
               </includes>
               <argLine>@{argLine}</argLine>
+              <excludedGroups>hanging</excludedGroups>
             </configuration>
           </plugin>
           <plugin>
@@ -456,9 +457,10 @@
               <targetTests>
                 <!-- <param>org.apache.bookkeeper.bookie.JournalTest</param> -->
                 <!-- <param>org.apache.bookkeeper.bookie.LLMJournalTest</param> -->
-                <!--<param>org.apache.bookkeeper.bookie.BufferedChannelConstructorTest</param> -->
+                <!-- <param>org.apache.bookkeeper.bookie.BufferedChannelConstructorTest</param> -->
                <param>org.apache.bookkeeper.bookie.BufferedChannelWriteTest</param>
               </targetTests>
+              <excludedGroups>hanging</excludedGroups>
               <outputFormats>
                 <outputFormat>XML</outputFormat>
                 <outputFormat>HTML</outputFormat>

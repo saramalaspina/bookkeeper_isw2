@@ -258,4 +258,60 @@ class BufferedChannelWriteTest {
             }
         }
     }
+
+    // Test added after first JaCoCo report (toWrite.hasRemaining() never true)
+    @Test
+    @DisplayName("flush() should handle partial writes correctly by looping")
+    void testFlush_whenPartialWriteOccurs() throws IOException {
+        // This test covers the do-while loop in the flush() method. It verifies that
+        // BufferedChannel can handle cases where the underlying FileChannel doesn't
+        // write the entire buffer in a single call, preventing data loss.
+
+        BufferedChannel channel = null;
+        // Data that will exactly fill the buffer to trigger the flush.
+        ByteBuf dataToFlush = Unpooled.buffer(1024).writerIndex(1024);
+
+        try {
+            channel = new BufferedChannel(allocator, mockFc, 1024, 1024, 0);
+
+            // Configure the mock FileChannel to simulate a partial write.
+            // The FIRST call to write() will only write half of the buffer.
+            // The SECOND call will write the remaining half.
+            when(mockFc.write(any(ByteBuffer.class)))
+                    .thenAnswer(invocation -> {
+                        ByteBuffer buffer = invocation.getArgument(0);
+                        int bytesToWrite = buffer.remaining() / 2; // Write half
+                        buffer.position(buffer.position() + bytesToWrite);
+                        return bytesToWrite;
+                    })
+                    .thenAnswer(invocation -> {
+                        ByteBuffer buffer = invocation.getArgument(0);
+                        int bytesToWrite = buffer.remaining(); // Write the rest
+                        buffer.position(buffer.position() + bytesToWrite);
+                        return bytesToWrite;
+                    });
+
+
+            channel.write(dataToFlush);
+
+            // The primary assertion: verify that fileChannel.write() was called exactly
+            // two times. This proves that the do-while loop executed correctly to
+            // handle the partial write.
+            verify(mockFc, times(2)).write(any(ByteBuffer.class));
+
+            // Secondary assertions to ensure the final state is correct.
+            BufferedChannel finalChannel = channel;
+            assertAll("Final state after a partial flush",
+                    () -> assertEquals(1024, finalChannel.position(), "Position should be fully advanced"),
+                    () -> assertEquals(0, finalChannel.getUnpersistedBytes()),
+                    () -> assertEquals(0, finalChannel.getNumOfBytesInWriteBuffer(), "Write buffer should be empty after a full flush")
+            );
+
+        } finally {
+            dataToFlush.release();
+            if (channel != null && channel.writeBuffer != null && channel.writeBuffer.refCnt() > 0) {
+                channel.writeBuffer.release();
+            }
+        }
+    }
 }

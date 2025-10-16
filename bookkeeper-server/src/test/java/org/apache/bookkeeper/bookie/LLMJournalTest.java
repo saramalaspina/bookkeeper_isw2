@@ -1,12 +1,11 @@
 package org.apache.bookkeeper.bookie;
 
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mockito;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,188 +13,228 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyLong;
 
 /**
- * JUnit 5 test suite for the static method {@link Journal#listJournalIds(File, Journal.JournalIdFilter)}.
- *
- * This class uses a combination of standard tests for edge cases and a parameterized test
- * to cover various partitions of file existence and filter application.
- *
- * The tests are designed to be robust and clean, using {@link TempDir} for file system
- * operations to ensure no side effects.
+ * Comprehensive JUnit 5 tests for the static method {@link Journal#listJournalIds(File, Journal.JournalIdFilter)}.
  */
 class LLMJournalTest {
 
-    // JUnit 5 will create and clean up this temporary directory for us.
     @TempDir
     Path tempDir;
 
-    //================================================================================
-    // Edge Case and Boundary Tests for the 'journalDir' parameter
-    //================================================================================
+    /**
+     * Helper method to create a .txn file with a given hexadecimal name.
+     * For example, a name "a" will create a file "a.txn".
+     */
+    private void createTxnFile(File dir, String hexName) throws IOException {
+        File file = new File(dir, hexName + ".txn");
+        if (!file.createNewFile()) {
+            throw new IOException("Failed to create test file: " + file.getAbsolutePath());
+        }
+    }
 
-    @Test
-    @DisplayName("Test with a null directory should throw NullPointerException")
-    void listJournalIds_whenDirectoryIsNull_shouldThrowNPE() {
-        assertThrows(NullPointerException.class,
-                () -> Journal.listJournalIds(null, null),
-                "Calling with a null directory should result in a NullPointerException."
-        );
+    /**
+     * Helper method to create a file with an arbitrary name.
+     */
+    private void createOtherFile(File dir, String name) throws IOException {
+        File file = new File(dir, name);
+        if (!file.createNewFile()) {
+            throw new IOException("Failed to create test file: " + file.getAbsolutePath());
+        }
     }
 
     @Test
-    @DisplayName("Test with a non-existent directory should return an empty list")
+    @DisplayName("Test with a directory that does not exist")
     void listJournalIds_whenDirectoryDoesNotExist_shouldReturnEmptyList() {
-        File nonExistentDir = new File(tempDir.toFile(), "non-existent-subdir");
+        File nonExistentDir = new File(tempDir.toFile(), "nonexistent");
         List<Long> journalIds = Journal.listJournalIds(nonExistentDir, null);
-        assertTrue(journalIds.isEmpty(), "A non-existent directory should yield an empty list of IDs.");
+        assertTrue(journalIds.isEmpty(), "Should return an empty list for a non-existent directory");
     }
 
     @Test
-    @DisplayName("Test with an empty directory should return an empty list")
+    @DisplayName("Test with a path that is a file, not a directory")
+    void listJournalIds_whenPathIsAFile_shouldReturnEmptyList() throws IOException {
+        File fileAsDir = tempDir.resolve("a_file.txt").toFile();
+        assertTrue(fileAsDir.createNewFile(), "Test file should be created");
+
+        List<Long> journalIds = Journal.listJournalIds(fileAsDir, null);
+        assertTrue(journalIds.isEmpty(), "Should return an empty list when the path is a file");
+    }
+
+    @Test
+    @DisplayName("Test with an empty journal directory")
     void listJournalIds_whenDirectoryIsEmpty_shouldReturnEmptyList() {
-        List<Long> journalIds = Journal.listJournalIds(tempDir.toFile(), null);
-        assertTrue(journalIds.isEmpty(), "An empty directory should yield an empty list of IDs.");
+        File journalDir = tempDir.toFile();
+        List<Long> journalIds = Journal.listJournalIds(journalDir, null);
+        assertTrue(journalIds.isEmpty(), "Should return an empty list for an empty directory");
     }
 
     @Test
-    @DisplayName("Test with a directory containing no journal (.txn) files")
-    void listJournalIds_whenDirectoryHasNoJournalFiles_shouldReturnEmptyList() throws IOException {
-        createFile("lastMark");
-        createFile("some-other-file.log");
-        createFile("1234.txt");
-
-        List<Long> journalIds = Journal.listJournalIds(tempDir.toFile(), null);
-        assertTrue(journalIds.isEmpty(), "A directory with no '.txn' files should yield an empty list.");
+    @DisplayName("Test with a null journal directory should throw NullPointerException")
+    void listJournalIds_whenDirectoryIsNull_shouldThrowNullPointerException() {
+        assertThrows(NullPointerException.class, () -> Journal.listJournalIds(null, null),
+                "Should throw NullPointerException when journalDir is null");
     }
 
-    //================================================================================
-    // Parameterized Tests for File and Filter Combinations
-    //================================================================================
+    @Test
+    @DisplayName("Test with a directory containing no .txn files")
+    void listJournalIds_whenDirectoryHasNoTxnFiles_shouldReturnEmptyList() throws IOException {
+        File journalDir = tempDir.toFile();
+        createOtherFile(journalDir, "1.log");
+        createOtherFile(journalDir, "some_file.txt");
+        createOtherFile(journalDir, "journal.tx"); // Suffix is not .txn
 
-    @ParameterizedTest(name = "[{index}] {0}")
-    @MethodSource("journalFileAndFilterScenarios")
-    @DisplayName("Test various file and filter combinations")
-    void listJournalIds_withFileAndFilterScenarios(
-            String testCaseName,
-            List<String> filesToCreate,
-            Journal.JournalIdFilter filter,
-            List<Long> expectedIds
-    ) throws IOException {
-
-        // Setup: Create the specified files in the temporary directory
-        for (String fileName : filesToCreate) {
-            createFile(fileName);
-        }
-
-        // Action: Call the method under test
-        List<Long> actualIds = Journal.listJournalIds(tempDir.toFile(), filter);
-
-        // Assertion: Verify the result is as expected
-        assertEquals(expectedIds, actualIds, "The list of journal IDs should match the expected output.");
+        List<Long> journalIds = Journal.listJournalIds(journalDir, null);
+        assertTrue(journalIds.isEmpty(), "Should return an empty list if no .txn files are present");
     }
 
-    /**
-     * Provides a stream of arguments for the parameterized test.
-     * Each argument set represents a distinct test scenario.
-     *
-     * @return A Stream of Arguments for the test.
-     */
-    private static Stream<Arguments> journalFileAndFilterScenarios() {
-        // This is our custom "dummyFilter" as requested in the analysis.
-        // It accepts only journal IDs that are even numbers.
-        Journal.JournalIdFilter evenIdFilter = new DummyEvenIdFilter();
+    @Test
+    @DisplayName("Test with valid .txn files and no filter, ensuring sorted output")
+    void listJournalIds_withValidTxnFilesAndNoFilter_shouldReturnSortedIds() throws IOException {
+        File journalDir = tempDir.toFile();
+        // Create files in a non-sorted order to test sorting
+        createTxnFile(journalDir, "10"); // 16
+        createTxnFile(journalDir, "1");  // 1
+        createTxnFile(journalDir, "a");  // 10
 
-        // This filter simulates the behavior of JournalRollingFilter by accepting IDs less than a boundary.
-        // We use this as a stand-in since JournalRollingFilter is a private inner class.
-        Journal.JournalIdFilter idsLessThan16Filter = new AcceptsIdsLessThan(16L);
+        List<Long> journalIds = Journal.listJournalIds(journalDir, null);
+        List<Long> expectedIds = Arrays.asList(1L, 10L, 16L);
 
-        return Stream.of(
-                // --- SCENARIO 1: Basic case with journal files and no filter ---
-                Arguments.of(
-                        "Directory with journal files, no filter",
-                        Arrays.asList("a.txn", "1.txn", "10.txn", "some-other-file.log"),
-                        null, // No filter
-                        Arrays.asList(1L, 10L, 16L) // Expect all valid hex IDs, sorted
-                ),
-                // --- SCENARIO 2: Boundary - single .txn file, no filter ---
-                Arguments.of(
-                        "Directory with a single journal file, no filter",
-                        Arrays.asList("f.txn"),
-                        null, // No filter
-                        Arrays.asList(15L) // Expect the single ID
-                ),
-                // --- SCENARIO 3: Filter that accepts a subset of files ---
-                Arguments.of(
-                        "Directory with journal files, using an 'even ID' filter",
-                        Arrays.asList("1.txn", "a.txn", "10.txn", "11.txn"), // IDs: 1, 10, 16, 17
-                        evenIdFilter,
-                        Arrays.asList(10L, 16L) // Expect only even IDs (a=10, 10=16), sorted
-                ),
-                // --- SCENARIO 4: Filter that accepts no files ---
-                Arguments.of(
-                        "Directory with journal files, using a filter that matches nothing",
-                        Arrays.asList("1.txn", "3.txn", "d.txn"), // IDs: 1, 3, 13 (all odd)
-                        evenIdFilter,
-                        Collections.emptyList() // Expect an empty list
-                ),
-                // --- SCENARIO 5: Filter that simulates a boundary condition ---
-                Arguments.of(
-                        "Directory with journal files, using a filter for IDs less than 16",
-                        Arrays.asList("1.txn", "a.txn", "10.txn", "11.txn"), // IDs: 1, 10, 16, 17
-                        idsLessThan16Filter,
-                        Arrays.asList(1L, 10L) // Expect IDs < 16 (1 and 10), sorted
-                )
-        );
+        assertIterableEquals(expectedIds, journalIds, "Should return a numerically sorted list of all journal IDs");
     }
 
-    //================================================================================
-    // Helper Methods and Custom Filter Implementations
-    //================================================================================
+    @Test
+    @DisplayName("Test with a mix of .txn and other files")
+    void listJournalIds_withMixedFiles_shouldReturnOnlyTxnIdsSorted() throws IOException {
+        File journalDir = tempDir.toFile();
+        createTxnFile(journalDir, "ff"); // 255
+        createOtherFile(journalDir, "ff.log");
+        createTxnFile(journalDir, "1a"); // 26
+        createOtherFile(journalDir, "config.conf");
 
-    /**
-     * A helper method to create an empty file within the temporary directory.
-     *
-     * @param fileName The name of the file to create.
-     * @throws IOException if file creation fails.
-     */
-    private void createFile(String fileName) throws IOException {
-        File newFile = new File(tempDir.toFile(), fileName);
-        if (!newFile.createNewFile()) {
-            throw new IOException("Failed to create temporary file: " + newFile.getAbsolutePath());
-        }
+        List<Long> journalIds = Journal.listJournalIds(journalDir, null);
+        List<Long> expectedIds = Arrays.asList(26L, 255L);
+
+        assertIterableEquals(expectedIds, journalIds, "Should ignore non-.txn files and return sorted IDs");
     }
 
-    /**
-     * A custom implementation of {@link Journal.JournalIdFilter} for testing purposes.
-     * This filter accepts only journal IDs that are even.
-     */
-    private static class DummyEvenIdFilter implements Journal.JournalIdFilter {
-        @Override
-        public boolean accept(long journalId) {
-            return journalId % 2 == 0;
-        }
+    @Test
+    @DisplayName("Test with a .txn filename containing multiple dots")
+    void listJournalIds_withFileNameHavingMultipleDots_shouldParseCorrectly() throws IOException {
+        File journalDir = tempDir.toFile();
+        // The SUT splits on "." and takes the first part. `1a.2b.txn` becomes `1a`.
+        createOtherFile(journalDir, "1a.2b.txn");
+
+        List<Long> journalIds = Journal.listJournalIds(journalDir, null);
+        // "1a" in hex is 26
+        List<Long> expectedIds = Collections.singletonList(26L);
+
+        assertIterableEquals(expectedIds, journalIds, "Should parse the ID from the string before the first dot");
     }
 
-    /**
-     * A custom implementation of {@link Journal.JournalIdFilter} that simulates boundary logic.
-     * This filter accepts journal IDs strictly less than a given maximum value.
-     */
-    private static class AcceptsIdsLessThan implements Journal.JournalIdFilter {
-        private final long maxIdToAccept;
+    @DisplayName("Test with invalid hex journal filenames")
+    @ParameterizedTest(name = "Filename: {0}.txn")
+    @ValueSource(strings = {
+            "g",          // Contains non-hex character
+            "not-a-hex",  // Contains non-hex characters
+            "-",          // Contains only a sign
+            ""            // Empty string before .txn
+    })
+    void listJournalIds_withInvalidHexInFileName_shouldThrowNumberFormatException(String invalidHexName) throws IOException {
+        File journalDir = tempDir.toFile();
+        // create a file with name like "g.txn", "-.txn", etc.
+        createOtherFile(journalDir, invalidHexName + ".txn");
 
-        public AcceptsIdsLessThan(long maxIdToAccept) {
-            this.maxIdToAccept = maxIdToAccept;
-        }
+        assertThrows(NumberFormatException.class, () -> Journal.listJournalIds(journalDir, null),
+                "Should throw NumberFormatException for invalid hex name: " + invalidHexName);
+    }
 
-        @Override
-        public boolean accept(long journalId) {
-            return journalId < maxIdToAccept;
-        }
+    @Test
+    @DisplayName("Test with a negative hex ID, ensuring it is parsed and sorted correctly")
+    void listJournalIds_withNegativeHexId_shouldParseAndSortCorrectly() throws IOException {
+        File journalDir = tempDir.toFile();
+        // Long.parseLong("-a", 16) results in -10L. The parser handles negative numbers.
+        createTxnFile(journalDir, "-a"); // -10
+        createTxnFile(journalDir, "5");  // 5
+
+        List<Long> journalIds = Journal.listJournalIds(journalDir, null);
+        List<Long> expectedIds = Arrays.asList(-10L, 5L);
+
+        assertIterableEquals(expectedIds, journalIds, "Should correctly parse and sort negative journal IDs");
+    }
+
+    @Test
+    @DisplayName("Test with a filter that accepts all journals")
+    void listJournalIds_withFilterAcceptingAll_shouldReturnAllIdsSorted() throws IOException {
+        File journalDir = tempDir.toFile();
+        createTxnFile(journalDir, "5");
+        createTxnFile(journalDir, "f");
+
+        Journal.JournalIdFilter acceptAllFilter = id -> true;
+        List<Long> journalIds = Journal.listJournalIds(journalDir, acceptAllFilter);
+        List<Long> expectedIds = Arrays.asList(5L, 15L);
+
+        assertIterableEquals(expectedIds, journalIds, "Should return all journal IDs when filter accepts all");
+    }
+
+    @Test
+    @DisplayName("Test with a filter that rejects all journals")
+    void listJournalIds_withFilterRejectingAll_shouldReturnEmptyList() throws IOException {
+        File journalDir = tempDir.toFile();
+        createTxnFile(journalDir, "5");
+        createTxnFile(journalDir, "f");
+
+        Journal.JournalIdFilter rejectAllFilter = id -> false;
+        List<Long> journalIds = Journal.listJournalIds(journalDir, rejectAllFilter);
+
+        assertTrue(journalIds.isEmpty(), "Should return an empty list when filter rejects all");
+    }
+
+    @Test
+    @DisplayName("Test with a filter that accepts a subset of journals")
+    void listJournalIds_withFilterAcceptingSubset_shouldReturnSubsetSorted() throws IOException {
+        File journalDir = tempDir.toFile();
+        createTxnFile(journalDir, "1"); // odd
+        createTxnFile(journalDir, "a"); // even (10)
+        createTxnFile(journalDir, "b"); // odd (11)
+        createTxnFile(journalDir, "10"); // even (16)
+
+        // Using a Mockito mock for the filter to demonstrate dependency mocking
+        Journal.JournalIdFilter evenIdFilter = Mockito.mock(Journal.JournalIdFilter.class);
+        Mockito.when(evenIdFilter.accept(anyLong())).thenAnswer(invocation -> {
+            long id = invocation.getArgument(0);
+            return id % 2 == 0;
+        });
+
+        List<Long> journalIds = Journal.listJournalIds(journalDir, evenIdFilter);
+        List<Long> expectedIds = Arrays.asList(10L, 16L);
+
+        assertIterableEquals(expectedIds, journalIds, "Should return only the journal IDs accepted by the filter");
+
+        // Verify that the filter was called for every .txn file
+        Mockito.verify(evenIdFilter).accept(1L);
+        Mockito.verify(evenIdFilter).accept(10L);
+        Mockito.verify(evenIdFilter).accept(11L);
+        Mockito.verify(evenIdFilter).accept(16L);
+        Mockito.verifyNoMoreInteractions(evenIdFilter);
+    }
+
+    @Test
+    @DisplayName("Test with a filter that throws an exception")
+    void listJournalIds_whenFilterThrowsException_shouldPropagateException() throws IOException {
+        File journalDir = tempDir.toFile();
+        createTxnFile(journalDir, "1");
+
+        Journal.JournalIdFilter throwingFilter = id -> {
+            throw new IllegalStateException("Filter error!");
+        };
+
+        assertThrows(IllegalStateException.class, () -> Journal.listJournalIds(journalDir, throwingFilter),
+                "Should propagate the exception thrown by the filter");
     }
 }

@@ -237,6 +237,12 @@
       <artifactId>awaitility</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-junit-jupiter</artifactId>
+      <version>${mockito.version}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -387,10 +393,11 @@
             <artifactId>maven-surefire-plugin</artifactId>
             <configuration>
               <includes>
-                <!-- <include>**/JournalTest.java</include> -->
-                <!-- <include>**/LLMJournalTest.java</include> -->
-                <!-- <include>**/BufferedChannelConstructorTest.java</include> -->
+                <include>**/JournalTest.java</include>
+                <include>**/LLMJournalTest.java</include>
+                <include>**/BufferedChannelConstructorTest.java</include>
                 <include>**/BufferedChannelWriteTest.java</include>
+                <param>org.apache.bookkeeper.bookie.LLMBufferedChannelTest</param>
               </includes>
               <argLine>@{argLine}</argLine>
               <excludedGroups>hanging</excludedGroups>
@@ -451,14 +458,15 @@
                 <jvmArg>java.base/java.util=ALL-UNNAMED</jvmArg>
               </jvmArgs>
               <targetClasses>
-                <!-- <param>org.apache.bookkeeper.bookie.Journal</param> -->
+                <param>org.apache.bookkeeper.bookie.Journal</param>
                 <param>org.apache.bookkeeper.bookie.BufferedChannel</param>
               </targetClasses>
               <targetTests>
-                <!-- <param>org.apache.bookkeeper.bookie.JournalTest</param> -->
-                <!-- <param>org.apache.bookkeeper.bookie.LLMJournalTest</param> -->
-                <!-- <param>org.apache.bookkeeper.bookie.BufferedChannelConstructorTest</param> -->
-               <param>org.apache.bookkeeper.bookie.BufferedChannelWriteTest</param>
+                <param>org.apache.bookkeeper.bookie.JournalTest</param>
+                <param>org.apache.bookkeeper.bookie.LLMJournalTest</param>
+                <param>org.apache.bookkeeper.bookie.BufferedChannelConstructorTest</param>
+                <param>org.apache.bookkeeper.bookie.BufferedChannelWriteTest</param>
+                <param>org.apache.bookkeeper.bookie.LLMBufferedChannelTest</param>
               </targetTests>
               <excludedGroups>hanging</excludedGroups>
               <outputFormats>

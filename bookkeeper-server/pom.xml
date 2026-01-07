@@ -395,6 +395,7 @@
               <includes>
                 <include>**/JournalTest.java</include>
                 <include>**/LLMJournalTest.java</include>
+                <param>org.apache.bookkeeper.bookie.LLMZeroShotJournalTest</param>
                 <include>**/BufferedChannelConstructorTest.java</include>
                 <include>**/BufferedChannelWriteTest.java</include>
                 <param>org.apache.bookkeeper.bookie.LLMBufferedChannelTest</param>
@@ -464,6 +465,7 @@
               <targetTests>
                 <param>org.apache.bookkeeper.bookie.JournalTest</param>
                 <param>org.apache.bookkeeper.bookie.LLMJournalTest</param>
+                <param>org.apache.bookkeeper.bookie.LLMZeroShotJournalTest</param>
                 <param>org.apache.bookkeeper.bookie.BufferedChannelConstructorTest</param>
                 <param>org.apache.bookkeeper.bookie.BufferedChannelWriteTest</param>
                 <param>org.apache.bookkeeper.bookie.LLMBufferedChannelTest</param>

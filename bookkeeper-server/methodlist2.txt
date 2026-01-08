@@ -1,3 +1,0 @@
-org.apache.bookkeeper.bookie.Journal.listJournalIds(java.io.File, org.apache.bookkeeper.bookie.Journal$JournalIdFilter)
-org.apache.bookkeeper.bookie.BufferedChannel.write(io.netty.buffer.ByteBuf)
-org.apache.bookkeeper.bookie.BufferedChannel.<init>(io.netty.buffer.ByteBufAllocator, java.nio.channels.FileChannel, int)

@@ -1,8 +1,3 @@
 org.apache.bookkeeper.bookie.Journal.listJournalIds(java.io.File, org.apache.bookkeeper.bookie.Journal$JournalIdFilter)
 org.apache.bookkeeper.bookie.BufferedChannel.write(io.netty.buffer.ByteBuf)
-org.apache.bookkeeper.bookie.BufferedChannel.flush()
-org.apache.bookkeeper.bookie.BufferedChannel.close()
-
-org.apache.bookkeeper.bookie.RandoopSetup.createCustomBufferedChannel(int, int)
-org.apache.bookkeeper.bookie.RandoopSetup.createRandomData(int)
-org.apache.bookkeeper.bookie.RandoopSetup.createJournalDirWithConfig(int, boolean)
+org.apache.bookkeeper.bookie.BufferedChannel.<init>(io.netty.buffer.ByteBufAllocator, java.nio.channels.FileChannel, int, int, long)

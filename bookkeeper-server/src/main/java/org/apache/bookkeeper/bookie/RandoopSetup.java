@@ -16,9 +16,12 @@ public class RandoopSetup {
 
     private static final String BASE_PATH = "target" + File.separator + "randoop-io";
 
-    public static BufferedChannel createCustomBufferedChannel(int capacity, int unpersistedBytesBound) {
-        if (capacity <= 0) capacity = 1;
-        if (capacity > 65536) capacity = 65536;
+    public static BufferedChannel createCustomBufferedChannel(int writeCapacity, int readCapacity, int unpersistedBytesBound) {
+        if (writeCapacity <= 0) writeCapacity = 1;
+        if (writeCapacity > 65536) writeCapacity = 65536;
+
+        if (readCapacity <= 0) readCapacity = 1;
+        if (readCapacity > 65536) readCapacity = 65536;
 
         if (unpersistedBytesBound < 0) unpersistedBytesBound = 0;
         if (unpersistedBytesBound > 100000) unpersistedBytesBound = 100000;
@@ -33,7 +36,7 @@ public class RandoopSetup {
             FileOutputStream fos = new FileOutputStream(temp);
             FileChannel fc = fos.getChannel();
 
-            return new BufferedChannel(UnpooledByteBufAllocator.DEFAULT, fc, capacity, unpersistedBytesBound);
+            return new BufferedChannel(UnpooledByteBufAllocator.DEFAULT, fc, writeCapacity, readCapacity, unpersistedBytesBound);
         } catch (Exception e) {
             return null;
         }

@@ -7,79 +7,77 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
+import java.util.Random;
 
 /**
- * Helper class for Randoop test generation.
- *
- * This class provides static factory methods to create complex objects
- * (like BufferedChannel) and valid filesystem states (files and directories)
- * required to test the Journal and BufferedChannel classes without mocking.
- *
- * We use fixed file paths instead of random temporary files to ensure
- * determinism. This prevents Randoop from generating "Flaky Tests" where
- * assertions fail because file paths change between generation and execution time.
+ * Helper class for Randoop test generation (Parameterized Factory).
  */
 public class RandoopSetup {
 
-    public static BufferedChannel createValidBufferedChannel() {
+    public static BufferedChannel createCustomBufferedChannel(int capacity, int unpersistedBytesBound) {
+        if (capacity <= 0) capacity = 1;
+        if (capacity > 65536) capacity = 65536;
+
+        if (unpersistedBytesBound < 0) unpersistedBytesBound = 0;
+        if (unpersistedBytesBound > 100000) unpersistedBytesBound = 100000;
+
         try {
-            // Use a fixed filename in the temp directory to ensure deterministic behavior
-            File temp = new File(System.getProperty("java.io.tmpdir"), "randoop-channel-fixed.dat");
-
-            // Clean up previous runs to ensure a fresh start
-            if (temp.exists()) {
-                temp.delete();
-            }
-            temp.createNewFile();
-            temp.deleteOnExit();
-
-            // Create a FileChannel from the file
+            File temp = new File(System.getProperty("java.io.tmpdir"), "randoop-dynamic-channel.dat");
             FileOutputStream fos = new FileOutputStream(temp);
             FileChannel fc = fos.getChannel();
 
-            // Create the BufferedChannel with a capacity of 1024 bytes
-            return new BufferedChannel(UnpooledByteBufAllocator.DEFAULT, fc, 1024);
+            return new BufferedChannel(UnpooledByteBufAllocator.DEFAULT, fc, capacity, unpersistedBytesBound);
         } catch (Exception e) {
-            e.printStackTrace();
             return null;
         }
     }
 
+    public static ByteBuf createRandomData(int length) {
+        if (length < 0) length = 0;
+        if (length > 8192) length = 8192;
 
-    public static ByteBuf createValidData() {
-        return Unpooled.wrappedBuffer("DataForTestString".getBytes());
+        byte[] data = new byte[length];
+        new Random().nextBytes(data);
+        return Unpooled.wrappedBuffer(data);
     }
 
 
-    public static File createValidJournalDir() {
+    public static File createJournalDirWithConfig(int numTxnFiles, boolean addGarbage) {
         try {
-            // Use a fixed directory name to prevent regression test failures
-            File dir = new File(System.getProperty("java.io.tmpdir"), "randoop-journal-fixed");
-
+            File dir = new File(System.getProperty("java.io.tmpdir"), "randoop-dynamic-journal");
             if (!dir.exists()) {
                 dir.mkdirs();
-                dir.deleteOnExit();
             }
-
-            // Create a valid journal file (Hexadecimal ID + .txn extension)
-            // '100' is a valid hex number.
-            File validFile = new File(dir, "100.txn");
-            if (!validFile.exists()) {
-                validFile.createNewFile();
-                validFile.deleteOnExit();
+            File[] files = dir.listFiles();
+            if (files != null) {
+                for (File f : files) {
+                    f.delete();
+                }
             }
-
-            // Create a garbage file that should be ignored by the filter
-            File garbageFile = new File(dir, "invalid-log-file.log");
-            if (!garbageFile.exists()) {
-                garbageFile.createNewFile();
-                garbageFile.deleteOnExit();
+            int safeNum = Math.min(Math.max(0, numTxnFiles), 20);
+            for (int i = 0; i < safeNum; i++) {
+                new File(dir, Integer.toHexString(i) + ".txn").createNewFile();
             }
-
+            if (addGarbage) {
+                new File(dir, "invalid-log.log").createNewFile();
+                new File(dir, "not-a-hex-number.txn").createNewFile();
+            }
+            dir.deleteOnExit();
             return dir;
         } catch (IOException e) {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public static Journal.JournalIdFilter createCustomFilter(int mode) {
+        return new Journal.JournalIdFilter() {
+            @Override
+            public boolean accept(long journalId) {
+                if (mode == 0) return true;
+                if (mode == 1) return false;
+                return (journalId % 2 == 0);
+            }
+        };
     }
 }

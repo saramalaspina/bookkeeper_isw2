@@ -49,8 +49,8 @@ public class RegressionTest0 {
             // Expected exception.
         }
         org.junit.Assert.assertNotNull(file2);
-        org.junit.Assert.assertEquals(file2.getParent(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T");
-        org.junit.Assert.assertEquals(file2.toString(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T/randoop-dynamic-journal");
+        org.junit.Assert.assertEquals(file2.getParent(), "target/randoop-io");
+        org.junit.Assert.assertEquals(file2.toString(), "target/randoop-io/randoop-journal");
     }
 
     @Test
@@ -147,8 +147,8 @@ public class RegressionTest0 {
             // Expected exception.
         }
         org.junit.Assert.assertNotNull(file2);
-        org.junit.Assert.assertEquals(file2.getParent(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T");
-        org.junit.Assert.assertEquals(file2.toString(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T/randoop-dynamic-journal");
+        org.junit.Assert.assertEquals(file2.getParent(), "target/randoop-io");
+        org.junit.Assert.assertEquals(file2.toString(), "target/randoop-io/randoop-journal");
     }
 
     @Test
@@ -165,8 +165,8 @@ public class RegressionTest0 {
             // Expected exception.
         }
         org.junit.Assert.assertNotNull(file2);
-        org.junit.Assert.assertEquals(file2.getParent(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T");
-        org.junit.Assert.assertEquals(file2.toString(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T/randoop-dynamic-journal");
+        org.junit.Assert.assertEquals(file2.getParent(), "target/randoop-io");
+        org.junit.Assert.assertEquals(file2.toString(), "target/randoop-io/randoop-journal");
     }
 
     @Test
@@ -195,8 +195,8 @@ public class RegressionTest0 {
         org.apache.bookkeeper.bookie.Journal.JournalIdFilter journalIdFilter5 = null;
         java.util.List<java.lang.Long> longList6 = org.apache.bookkeeper.bookie.Journal.listJournalIds(file2, journalIdFilter5);
         org.junit.Assert.assertNotNull(file2);
-        org.junit.Assert.assertEquals(file2.getParent(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T");
-        org.junit.Assert.assertEquals(file2.toString(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T/randoop-dynamic-journal");
+        org.junit.Assert.assertEquals(file2.getParent(), "target/randoop-io");
+        org.junit.Assert.assertEquals(file2.toString(), "target/randoop-io/randoop-journal");
         org.junit.Assert.assertNotNull(longList4);
         org.junit.Assert.assertNotNull(longList6);
     }
@@ -215,8 +215,8 @@ public class RegressionTest0 {
             // Expected exception.
         }
         org.junit.Assert.assertNotNull(file2);
-        org.junit.Assert.assertEquals(file2.getParent(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T");
-        org.junit.Assert.assertEquals(file2.toString(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T/randoop-dynamic-journal");
+        org.junit.Assert.assertEquals(file2.getParent(), "target/randoop-io");
+        org.junit.Assert.assertEquals(file2.toString(), "target/randoop-io/randoop-journal");
     }
 
     @Test
@@ -268,8 +268,8 @@ public class RegressionTest0 {
             System.out.format("%n%s%n", "RegressionTest0.test019");
         java.io.File file2 = org.apache.bookkeeper.bookie.RandoopSetup.createJournalDirWithConfig(100, true);
         org.junit.Assert.assertNotNull(file2);
-        org.junit.Assert.assertEquals(file2.getParent(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T");
-        org.junit.Assert.assertEquals(file2.toString(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T/randoop-dynamic-journal");
+        org.junit.Assert.assertEquals(file2.getParent(), "target/randoop-io");
+        org.junit.Assert.assertEquals(file2.toString(), "target/randoop-io/randoop-journal");
     }
 
     @Test
@@ -278,8 +278,8 @@ public class RegressionTest0 {
             System.out.format("%n%s%n", "RegressionTest0.test020");
         java.io.File file2 = org.apache.bookkeeper.bookie.RandoopSetup.createJournalDirWithConfig((int) (short) 0, false);
         org.junit.Assert.assertNotNull(file2);
-        org.junit.Assert.assertEquals(file2.getParent(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T");
-        org.junit.Assert.assertEquals(file2.toString(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T/randoop-dynamic-journal");
+        org.junit.Assert.assertEquals(file2.getParent(), "target/randoop-io");
+        org.junit.Assert.assertEquals(file2.toString(), "target/randoop-io/randoop-journal");
     }
 
     @Test
@@ -288,8 +288,8 @@ public class RegressionTest0 {
             System.out.format("%n%s%n", "RegressionTest0.test021");
         java.io.File file2 = org.apache.bookkeeper.bookie.RandoopSetup.createJournalDirWithConfig((int) (byte) 1, true);
         org.junit.Assert.assertNotNull(file2);
-        org.junit.Assert.assertEquals(file2.getParent(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T");
-        org.junit.Assert.assertEquals(file2.toString(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T/randoop-dynamic-journal");
+        org.junit.Assert.assertEquals(file2.getParent(), "target/randoop-io");
+        org.junit.Assert.assertEquals(file2.toString(), "target/randoop-io/randoop-journal");
     }
 
     @Test
@@ -388,8 +388,8 @@ public class RegressionTest0 {
             System.out.format("%n%s%n", "RegressionTest0.test030");
         java.io.File file2 = org.apache.bookkeeper.bookie.RandoopSetup.createJournalDirWithConfig((int) (byte) 10, false);
         org.junit.Assert.assertNotNull(file2);
-        org.junit.Assert.assertEquals(file2.getParent(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T");
-        org.junit.Assert.assertEquals(file2.toString(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T/randoop-dynamic-journal");
+        org.junit.Assert.assertEquals(file2.getParent(), "target/randoop-io");
+        org.junit.Assert.assertEquals(file2.toString(), "target/randoop-io/randoop-journal");
     }
 
     @Test
@@ -458,8 +458,8 @@ public class RegressionTest0 {
             System.out.format("%n%s%n", "RegressionTest0.test036");
         java.io.File file2 = org.apache.bookkeeper.bookie.RandoopSetup.createJournalDirWithConfig(10, false);
         org.junit.Assert.assertNotNull(file2);
-        org.junit.Assert.assertEquals(file2.getParent(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T");
-        org.junit.Assert.assertEquals(file2.toString(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T/randoop-dynamic-journal");
+        org.junit.Assert.assertEquals(file2.getParent(), "target/randoop-io");
+        org.junit.Assert.assertEquals(file2.toString(), "target/randoop-io/randoop-journal");
     }
 
     @Test
@@ -516,8 +516,8 @@ public class RegressionTest0 {
             System.out.format("%n%s%n", "RegressionTest0.test040");
         java.io.File file2 = org.apache.bookkeeper.bookie.RandoopSetup.createJournalDirWithConfig((int) (byte) 100, false);
         org.junit.Assert.assertNotNull(file2);
-        org.junit.Assert.assertEquals(file2.getParent(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T");
-        org.junit.Assert.assertEquals(file2.toString(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T/randoop-dynamic-journal");
+        org.junit.Assert.assertEquals(file2.getParent(), "target/randoop-io");
+        org.junit.Assert.assertEquals(file2.toString(), "target/randoop-io/randoop-journal");
     }
 
     @Test
@@ -656,8 +656,8 @@ public class RegressionTest0 {
             // Expected exception.
         }
         org.junit.Assert.assertNotNull(file2);
-        org.junit.Assert.assertEquals(file2.getParent(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T");
-        org.junit.Assert.assertEquals(file2.toString(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T/randoop-dynamic-journal");
+        org.junit.Assert.assertEquals(file2.getParent(), "target/randoop-io");
+        org.junit.Assert.assertEquals(file2.toString(), "target/randoop-io/randoop-journal");
     }
 
     @Test
@@ -720,8 +720,8 @@ public class RegressionTest0 {
             System.out.format("%n%s%n", "RegressionTest0.test052");
         java.io.File file2 = org.apache.bookkeeper.bookie.RandoopSetup.createJournalDirWithConfig((int) (short) 1, true);
         org.junit.Assert.assertNotNull(file2);
-        org.junit.Assert.assertEquals(file2.getParent(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T");
-        org.junit.Assert.assertEquals(file2.toString(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T/randoop-dynamic-journal");
+        org.junit.Assert.assertEquals(file2.getParent(), "target/randoop-io");
+        org.junit.Assert.assertEquals(file2.toString(), "target/randoop-io/randoop-journal");
     }
 
     @Test
@@ -732,8 +732,8 @@ public class RegressionTest0 {
         org.apache.bookkeeper.bookie.Journal.JournalIdFilter journalIdFilter3 = null;
         java.util.List<java.lang.Long> longList4 = org.apache.bookkeeper.bookie.Journal.listJournalIds(file2, journalIdFilter3);
         org.junit.Assert.assertNotNull(file2);
-        org.junit.Assert.assertEquals(file2.getParent(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T");
-        org.junit.Assert.assertEquals(file2.toString(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T/randoop-dynamic-journal");
+        org.junit.Assert.assertEquals(file2.getParent(), "target/randoop-io");
+        org.junit.Assert.assertEquals(file2.toString(), "target/randoop-io/randoop-journal");
         org.junit.Assert.assertNotNull(longList4);
     }
 
@@ -743,8 +743,8 @@ public class RegressionTest0 {
             System.out.format("%n%s%n", "RegressionTest0.test054");
         java.io.File file2 = org.apache.bookkeeper.bookie.RandoopSetup.createJournalDirWithConfig((int) ' ', true);
         org.junit.Assert.assertNotNull(file2);
-        org.junit.Assert.assertEquals(file2.getParent(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T");
-        org.junit.Assert.assertEquals(file2.toString(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T/randoop-dynamic-journal");
+        org.junit.Assert.assertEquals(file2.getParent(), "target/randoop-io");
+        org.junit.Assert.assertEquals(file2.toString(), "target/randoop-io/randoop-journal");
     }
 
     @Test
@@ -799,8 +799,8 @@ public class RegressionTest0 {
         org.apache.bookkeeper.bookie.Journal.JournalIdFilter journalIdFilter5 = null;
         java.util.List<java.lang.Long> longList6 = org.apache.bookkeeper.bookie.Journal.listJournalIds(file2, journalIdFilter5);
         org.junit.Assert.assertNotNull(file2);
-        org.junit.Assert.assertEquals(file2.getParent(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T");
-        org.junit.Assert.assertEquals(file2.toString(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T/randoop-dynamic-journal");
+        org.junit.Assert.assertEquals(file2.getParent(), "target/randoop-io");
+        org.junit.Assert.assertEquals(file2.toString(), "target/randoop-io/randoop-journal");
         org.junit.Assert.assertNotNull(longList4);
         org.junit.Assert.assertNotNull(longList6);
     }
@@ -848,8 +848,8 @@ public class RegressionTest0 {
         org.apache.bookkeeper.bookie.Journal.JournalIdFilter journalIdFilter5 = null;
         java.util.List<java.lang.Long> longList6 = org.apache.bookkeeper.bookie.Journal.listJournalIds(file2, journalIdFilter5);
         org.junit.Assert.assertNotNull(file2);
-        org.junit.Assert.assertEquals(file2.getParent(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T");
-        org.junit.Assert.assertEquals(file2.toString(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T/randoop-dynamic-journal");
+        org.junit.Assert.assertEquals(file2.getParent(), "target/randoop-io");
+        org.junit.Assert.assertEquals(file2.toString(), "target/randoop-io/randoop-journal");
         org.junit.Assert.assertNotNull(longList4);
         org.junit.Assert.assertNotNull(longList6);
     }
@@ -868,8 +868,8 @@ public class RegressionTest0 {
             // Expected exception.
         }
         org.junit.Assert.assertNotNull(file2);
-        org.junit.Assert.assertEquals(file2.getParent(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T");
-        org.junit.Assert.assertEquals(file2.toString(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T/randoop-dynamic-journal");
+        org.junit.Assert.assertEquals(file2.getParent(), "target/randoop-io");
+        org.junit.Assert.assertEquals(file2.toString(), "target/randoop-io/randoop-journal");
     }
 
     @Test
@@ -983,8 +983,8 @@ public class RegressionTest0 {
             System.out.format("%n%s%n", "RegressionTest0.test072");
         java.io.File file2 = org.apache.bookkeeper.bookie.RandoopSetup.createJournalDirWithConfig((int) (short) 100, false);
         org.junit.Assert.assertNotNull(file2);
-        org.junit.Assert.assertEquals(file2.getParent(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T");
-        org.junit.Assert.assertEquals(file2.toString(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T/randoop-dynamic-journal");
+        org.junit.Assert.assertEquals(file2.getParent(), "target/randoop-io");
+        org.junit.Assert.assertEquals(file2.toString(), "target/randoop-io/randoop-journal");
     }
 
     @Test
@@ -1017,8 +1017,8 @@ public class RegressionTest0 {
             // Expected exception.
         }
         org.junit.Assert.assertNotNull(file2);
-        org.junit.Assert.assertEquals(file2.getParent(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T");
-        org.junit.Assert.assertEquals(file2.toString(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T/randoop-dynamic-journal");
+        org.junit.Assert.assertEquals(file2.getParent(), "target/randoop-io");
+        org.junit.Assert.assertEquals(file2.toString(), "target/randoop-io/randoop-journal");
     }
 
     @Test
@@ -1086,8 +1086,8 @@ public class RegressionTest0 {
             System.out.format("%n%s%n", "RegressionTest0.test082");
         java.io.File file2 = org.apache.bookkeeper.bookie.RandoopSetup.createJournalDirWithConfig((int) 'a', true);
         org.junit.Assert.assertNotNull(file2);
-        org.junit.Assert.assertEquals(file2.getParent(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T");
-        org.junit.Assert.assertEquals(file2.toString(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T/randoop-dynamic-journal");
+        org.junit.Assert.assertEquals(file2.getParent(), "target/randoop-io");
+        org.junit.Assert.assertEquals(file2.toString(), "target/randoop-io/randoop-journal");
     }
 
     @Test
@@ -1235,8 +1235,8 @@ public class RegressionTest0 {
             System.out.format("%n%s%n", "RegressionTest0.test091");
         java.io.File file2 = org.apache.bookkeeper.bookie.RandoopSetup.createJournalDirWithConfig((int) (short) 10, true);
         org.junit.Assert.assertNotNull(file2);
-        org.junit.Assert.assertEquals(file2.getParent(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T");
-        org.junit.Assert.assertEquals(file2.toString(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T/randoop-dynamic-journal");
+        org.junit.Assert.assertEquals(file2.getParent(), "target/randoop-io");
+        org.junit.Assert.assertEquals(file2.toString(), "target/randoop-io/randoop-journal");
     }
 
     @Test
@@ -1247,8 +1247,8 @@ public class RegressionTest0 {
         org.apache.bookkeeper.bookie.Journal.JournalIdFilter journalIdFilter3 = null;
         java.util.List<java.lang.Long> longList4 = org.apache.bookkeeper.bookie.Journal.listJournalIds(file2, journalIdFilter3);
         org.junit.Assert.assertNotNull(file2);
-        org.junit.Assert.assertEquals(file2.getParent(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T");
-        org.junit.Assert.assertEquals(file2.toString(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T/randoop-dynamic-journal");
+        org.junit.Assert.assertEquals(file2.getParent(), "target/randoop-io");
+        org.junit.Assert.assertEquals(file2.toString(), "target/randoop-io/randoop-journal");
         org.junit.Assert.assertNotNull(longList4);
     }
 
@@ -1264,8 +1264,8 @@ public class RegressionTest0 {
         org.apache.bookkeeper.bookie.Journal.JournalIdFilter journalIdFilter7 = null;
         java.util.List<java.lang.Long> longList8 = org.apache.bookkeeper.bookie.Journal.listJournalIds(file2, journalIdFilter7);
         org.junit.Assert.assertNotNull(file2);
-        org.junit.Assert.assertEquals(file2.getParent(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T");
-        org.junit.Assert.assertEquals(file2.toString(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T/randoop-dynamic-journal");
+        org.junit.Assert.assertEquals(file2.getParent(), "target/randoop-io");
+        org.junit.Assert.assertEquals(file2.toString(), "target/randoop-io/randoop-journal");
         org.junit.Assert.assertNotNull(longList4);
         org.junit.Assert.assertNotNull(longList6);
         org.junit.Assert.assertNotNull(longList8);
@@ -1459,8 +1459,8 @@ public class RegressionTest0 {
         org.apache.bookkeeper.bookie.Journal.JournalIdFilter journalIdFilter7 = null;
         java.util.List<java.lang.Long> longList8 = org.apache.bookkeeper.bookie.Journal.listJournalIds(file2, journalIdFilter7);
         org.junit.Assert.assertNotNull(file2);
-        org.junit.Assert.assertEquals(file2.getParent(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T");
-        org.junit.Assert.assertEquals(file2.toString(), "/var/folders/kd/ly9kdl3s07bd0zt7w5ytfvsr0000gn/T/randoop-dynamic-journal");
+        org.junit.Assert.assertEquals(file2.getParent(), "target/randoop-io");
+        org.junit.Assert.assertEquals(file2.toString(), "target/randoop-io/randoop-journal");
         org.junit.Assert.assertNotNull(longList4);
         org.junit.Assert.assertNotNull(longList6);
         org.junit.Assert.assertNotNull(longList8);

@@ -14,6 +14,8 @@ import java.util.Random;
  */
 public class RandoopSetup {
 
+    private static final String BASE_PATH = "target" + File.separator + "randoop-io";
+
     public static BufferedChannel createCustomBufferedChannel(int capacity, int unpersistedBytesBound) {
         if (capacity <= 0) capacity = 1;
         if (capacity > 65536) capacity = 65536;
@@ -22,7 +24,12 @@ public class RandoopSetup {
         if (unpersistedBytesBound > 100000) unpersistedBytesBound = 100000;
 
         try {
-            File temp = new File(System.getProperty("java.io.tmpdir"), "randoop-dynamic-channel.dat");
+            File baseDir = new File(BASE_PATH);
+            if (!baseDir.exists()) {
+                baseDir.mkdirs();
+            }
+
+            File temp = new File(baseDir, "randoop-channel.dat");
             FileOutputStream fos = new FileOutputStream(temp);
             FileChannel fc = fos.getChannel();
 
@@ -41,19 +48,25 @@ public class RandoopSetup {
         return Unpooled.wrappedBuffer(data);
     }
 
-
     public static File createJournalDirWithConfig(int numTxnFiles, boolean addGarbage) {
         try {
-            File dir = new File(System.getProperty("java.io.tmpdir"), "randoop-dynamic-journal");
+            File baseDir = new File(BASE_PATH);
+            if (!baseDir.exists()) {
+                baseDir.mkdirs();
+            }
+
+            File dir = new File(baseDir, "randoop-journal");
             if (!dir.exists()) {
                 dir.mkdirs();
             }
+
             File[] files = dir.listFiles();
             if (files != null) {
                 for (File f : files) {
                     f.delete();
                 }
             }
+
             int safeNum = Math.min(Math.max(0, numTxnFiles), 20);
             for (int i = 0; i < safeNum; i++) {
                 new File(dir, Integer.toHexString(i) + ".txn").createNewFile();
@@ -62,6 +75,7 @@ public class RandoopSetup {
                 new File(dir, "invalid-log.log").createNewFile();
                 new File(dir, "not-a-hex-number.txn").createNewFile();
             }
+
             dir.deleteOnExit();
             return dir;
         } catch (IOException e) {
